@@ -51,20 +51,20 @@ yearly_discretionary_spending <- fed_spend %>%
 temp_rate <- 100*diff(yearly_gdp$gdp)/yearly_gdp[-nrow(yearly_gdp),]$gdp
 length(temp_rate)
 
-# 1. gdp roc with total_spend and disc_spend
+# 1. gdp roc with total_spend and disc_spend [R2]
 
-# 2. gdp roc vs per group roc (fed, energy, climate)
+# 2. gdp roc vs per group roc (fed, energy, climate) [R2]
 
-# 3. gdp roc versus every department
+# 3. gdp roc versus every department [R2]
 
 # 1,2 3 repeated with total spending in place of gdp
 # 1,2,3 repeated with disc spending in place of gdp
 
 # budget vs time for all groups (fed, climate, energy) separate department by color
 
-# average rate of change for all groups vs each other
+# average rate of change for all groups vs each other [R2]
 
-# gdp versus
+# gdp versus [R2]
 #   total spend
 #   disc spend
 
