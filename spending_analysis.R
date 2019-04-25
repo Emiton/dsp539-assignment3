@@ -84,12 +84,31 @@ ggplot(roc_melt) +
 
 # A2. gdp roc vs per group roc (fed, energy, climate) [R2]
 
+# get mean roc per group
+
+# create 3 DF with mean roc (1 for each group), gdp, year
+# melt and make plot for each one versus GDP
+
+
+
+
+
+
 # A3. gdp roc versus every department [R2]
+
+# create DF with roc for each department for each group
+#   might have to use function
+
+# make plot with all rates of change versus GDP
+
+
+
+
+
+
 
 # 1,2 3 repeated with total spending in place of gdp
 # 1,2,3 repeated with disc spending in place of gdp
-
-# budget vs time for all groups (fed, climate, energy) separate department by color
 
 # average rate of change for all groups vs each other [R2]
 
