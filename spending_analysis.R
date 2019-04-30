@@ -163,13 +163,30 @@ department_matrix_roc <- function(df, monies_col) {
   matrix_roc
 }
 
-department_matrix_roc(climate_spend, "gcc_spending")
+fed_department_roc <- department_matrix_roc(fed_spend, "rd_budget")
+fed_department_roc$gdp_change <- gdp_budget_roc$gdp_change
 
-# create DF with roc for each department for each group
-#   might have to use function
+energy_department_roc <- department_matrix_roc(energy_spend, "energy_spending")
+energy_department_roc <- energy_department_roc[-nrow(energy_department_roc),] # remove last row, no GDP for 2018
+energy_department_roc$gdp_change <- gdp_budget_roc$gdp_change[22:41]
 
-# make plot with all rates of change versus GDP
+climate_department_roc <- department_matrix_roc(climate_spend, "gcc_spending")
+climate_department_roc$gdp_change <- gdp_budget_roc$gdp_change[25:41]
 
+# For each department make plot with all rates of change versus GDP
+fed_roc_melt <- melt(fed_department_roc, id=c("year"))
+ggplot(fed_roc_melt) +
+  geom_line(aes(x = year, y = value, color=variable))
+
+
+energy_roc_melt <- melt(energy_department_roc, id=c("year"))
+ggplot(energy_roc_melt) +
+  geom_line(aes(x = year, y = value, color=variable))
+
+
+climate_roc_melt <- melt(climate_department_roc, id=c("year"))
+ggplot(climate_roc_melt) +
+  geom_line(aes(x = year, y = value, color=variable))
 
 
 
@@ -182,12 +199,11 @@ department_matrix_roc(climate_spend, "gcc_spending")
 #   total spend
 #   disc spend
 
-# # EXTRA # #
 
-# Put budgets into buckets
-#   perform analyses based on bucket
-#   e.g. mean for bucket 1 is doing blah blah over these years...
-
+# Positive/negative chart
+# if ROC positive = 1
+# if ROC negative = -1
+# make new chart with these values for ROC and plot against all departments
 
 
 
