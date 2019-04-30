@@ -85,13 +85,57 @@ ggplot(roc_melt) +
 # A2. gdp roc vs per group roc (fed, energy, climate) [R2]
 
 # get mean roc per group
+fed_mean_spend <- fed_spend %>%
+  group_by(year) %>%
+  summarize(average_spend = mean(rd_budget))
 
-# create 3 DF with mean roc (1 for each group), gdp, year
-# melt and make plot for each one versus GDP
+energy_mean_spend <- energy_spend %>%
+  group_by(year) %>%
+  summarize(average_spend = mean(energy_spending))
+
+climate_mean_spend <- climate_spend %>%
+  group_by(year) %>%
+  summarize(average_spend = mean(gcc_spending))
 
 
+fed_mean_change <- 100*diff(fed_mean_spend$average_spend)/fed_mean_spend[-nrow(fed_mean_spend),]$average_spend
+energy_mean_change <- 100*diff(energy_mean_spend$average_spend)/energy_mean_spend[-nrow(energy_mean_spend),]$average_spend
+climate_mean_change <- 100*diff(climate_mean_spend$average_spend)/climate_mean_spend[-nrow(climate_mean_spend),]$average_spend
 
 
+fed_roc <- data.frame("year" = fed_mean_spend$year[2:42],
+                      "fed_change" = fed_mean_change,
+                      "gdp_change" = gdp_change)
+
+energy_roc <- data.frame("year" = energy_mean_spend$year[2:22],
+                         "energy_change" = energy_mean_change,
+                         "gdp_change" = gdp_change[22:42])
+
+energy_roc <- energy_roc[-nrow(energy_roc),] # Remove last row b/c there is no GDP data for 2018
+
+climate_roc <- data.frame("year" = climate_mean_spend$year[2:18],
+                          "climate_change" = climate_mean_change,
+                          "gdp_change" = gdp_change[25:41])
+
+
+# make plot for each roc versus GDP
+fed_melt <- melt(fed_roc, id=c("year"))
+
+ggplot(fed_melt) +
+  geom_line(aes(x = year, y = value, color=variable)) +
+  scale_color_manual(values = c("red", "blue"))
+
+energy_melt <- melt(energy_roc, id=c("year"))
+
+ggplot(energy_melt) +
+  geom_line(aes(x = year, y = value, color=variable)) +
+  scale_color_manual(values = c("red", "blue"))
+
+climate_melt <- melt(climate_roc, id=c("year"))
+
+ggplot(climate_melt) +
+  geom_line(aes(x = year, y = value, color=variable)) +
+  scale_color_manual(values = c("red", "blue"))
 
 
 # A3. gdp roc versus every department [R2]
@@ -106,11 +150,8 @@ ggplot(roc_melt) +
 
 
 
-
 # 1,2 3 repeated with total spending in place of gdp
 # 1,2,3 repeated with disc spending in place of gdp
-
-# average rate of change for all groups vs each other [R2]
 
 # gdp versus [R2]
 #   total spend
