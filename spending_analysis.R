@@ -120,25 +120,50 @@ climate_roc <- data.frame("year" = climate_mean_spend$year[2:18],
 
 # make plot for each roc versus GDP
 fed_melt <- melt(fed_roc, id=c("year"))
-
 ggplot(fed_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red", "blue"))
 
 energy_melt <- melt(energy_roc, id=c("year"))
-
 ggplot(energy_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red", "blue"))
 
 climate_melt <- melt(climate_roc, id=c("year"))
-
 ggplot(climate_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red", "blue"))
 
 
 # A3. gdp roc versus every department [R2]
+
+
+" 
+function: department_matrix_roc
+description: Given a data frame and a column, gets the 
+             rate of change per department in said column
+returns: matrix where each col is department, and each row
+         is percent change from previous year
+"
+department_matrix_roc <- function(df, monies_col) {
+  departments <- unique(df$department)
+  dep_one_yearly <- filter(df, department == as.character(departments[1])) # all unique years
+  df_years <- nrow(dep_one_yearly) # range of years in DF
+  matrix_roc <- data.frame("year" = dep_one_yearly$year[2:df_years])
+  
+  for (dep in departments) {
+    # Get yearly spending for department
+    curr_dep <- df %>%
+      filter(department == as.character(dep)) %>%
+      select(year, monies_col)
+    
+    curr_dep_roc <- 100*diff(curr_dep[[monies_col]])/curr_dep[-nrow(curr_dep),][[monies_col]]
+    matrix_roc[dep] <- curr_dep_roc
+  }
+  matrix_roc
+}
+
+department_matrix_roc(climate_spend, "gcc_spending")
 
 # create DF with roc for each department for each group
 #   might have to use function
