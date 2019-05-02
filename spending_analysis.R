@@ -188,16 +188,111 @@ climate_roc_melt <- melt(climate_department_roc, id=c("year"))
 ggplot(climate_roc_melt) +
   geom_line(aes(x = year, y = value, color=variable))
 
+# B2. Total spending rate of change versus rate of change per group average spending
+fed_roc_total_spend <- data.frame("year" = fed_mean_spend$year[2:42],
+                      "fed_change" = fed_mean_change,
+                      "total_spending_change" = total_outlay_change)
+
+energy_roc_total_spend <- data.frame("year" = energy_mean_spend$year[2:22],
+                         "energy_change" = energy_mean_change,
+                         "total_spending_change" = total_outlay_change[22:42])
+energy_roc_total_spend <- energy_roc_total_spend[-nrow(energy_roc_total_spend),] # Remove last row b/c there is no GDP data for 2018
+
+climate_roc_total_spend <- data.frame("year" = climate_mean_spend$year[2:18],
+                          "climate_change" = climate_mean_change,
+                          "total_spending_change" = total_outlay_change[25:41])
+
+fed_melt_total_spend <- melt(fed_roc_total_spend, id=c("year"))
+ggplot(fed_melt_total_spend) +
+  geom_line(aes(x = year, y = value, color=variable)) +
+  scale_color_manual(values = c("red", "blue"))
+
+energy_melt_total_spend <- melt(energy_roc_total_spend, id=c("year"))
+ggplot(energy_melt_total_spend) +
+  geom_line(aes(x = year, y = value, color=variable)) +
+  scale_color_manual(values = c("red", "blue"))
+
+climate_melt_total_spend <- melt(climate_roc_total_spend, id=c("year"))
+ggplot(climate_melt_total_spend) +
+  geom_line(aes(x = year, y = value, color=variable)) +
+  scale_color_manual(values = c("red", "blue"))
+
+# B3. Rate of change per department per group vs total spending
+fed_department_roc_total_spend <- fed_department_roc[,!(names(fed_department_roc) %in% c("gdp_change"))]
+fed_department_roc_total_spend$spending_change <- gdp_budget_roc$outlay_change
+
+energy_department_roc_total_spend <- energy_department_roc[,!(names(energy_department_roc) %in% c("gdp_change"))]
+energy_department_roc_total_spend$spending_change <- gdp_budget_roc$outlay_change[22:41]
+
+climate_department_roc_total_spend <- climate_department_roc[,!(names(climate_department_roc) %in% c("gdp_change"))]
+climate_department_roc_total_spend$spending_change <- gdp_budget_roc$outlay_change[25:41]
+
+fed_roc_total_spend_melt <- melt(fed_department_roc_total_spend, id=c("year"))
+ggplot(fed_roc_total_spend_melt) +
+  geom_line(aes(x = year, y = value, color=variable))
 
 
+energy_roc_total_spend_melt <- melt(energy_department_roc_total_spend, id=c("year"))
+ggplot(energy_roc_total_spend_melt) +
+  geom_line(aes(x = year, y = value, color=variable))
 
 
-# 1,2 3 repeated with total spending in place of gdp
-# 1,2,3 repeated with disc spending in place of gdp
+climate_roc_total_spend_melt <- melt(climate_department_roc_total_spend, id=c("year"))
+ggplot(climate_roc_total_spend_melt) +
+  geom_line(aes(x = year, y = value, color=variable))
 
-# gdp versus [R2]
-#   total spend
-#   disc spend
+# C2. Discretionary spending rate of change versus rate of change per group average spending
+fed_roc_disc_spend <- data.frame("year" = fed_mean_spend$year[2:42],
+                                  "fed_change" = fed_mean_change,
+                                  "disc_spending_change" = disc_outlay_change)
+
+energy_roc_disc_spend <- data.frame("year" = energy_mean_spend$year[2:22],
+                                     "energy_change" = energy_mean_change,
+                                     "disc_spending_change" = disc_outlay_change[22:42])
+energy_roc_disc_spend <- energy_roc_disc_spend[-nrow(energy_roc_disc_spend),] # Remove last row b/c there is no GDP data for 2018
+
+climate_roc_disc_spend <- data.frame("year" = climate_mean_spend$year[2:18],
+                                      "climate_change" = climate_mean_change,
+                                      "disc_spending_change" = disc_outlay_change[25:41])
+
+fed_melt_disc_spend <- melt(fed_roc_disc_spend, id=c("year"))
+ggplot(fed_melt_disc_spend) +
+  geom_line(aes(x = year, y = value, color=variable)) +
+  scale_color_manual(values = c("red", "blue"))
+
+energy_melt_disc_spend <- melt(energy_roc_disc_spend, id=c("year"))
+ggplot(energy_melt_disc_spend) +
+  geom_line(aes(x = year, y = value, color=variable)) +
+  scale_color_manual(values = c("red", "blue"))
+
+climate_melt_disc_spend <- melt(climate_roc_disc_spend, id=c("year"))
+ggplot(climate_melt_disc_spend) +
+  geom_line(aes(x = year, y = value, color=variable)) +
+  scale_color_manual(values = c("red", "blue"))
+# C3. Rate of change per department per group vs discretionary spending
+fed_department_roc_disc_spend <- fed_department_roc[,!(names(fed_department_roc) %in% c("gdp_change"))]
+fed_department_roc_disc_spend$spending_change <- gdp_budget_roc$disc_change
+
+energy_department_roc_disc_spend <- energy_department_roc[,!(names(energy_department_roc) %in% c("gdp_change"))]
+energy_department_roc_disc_spend$spending_change <- gdp_budget_roc$disc_change[22:41]
+
+climate_department_roc_disc_spend <- climate_department_roc[,!(names(climate_department_roc) %in% c("gdp_change"))]
+climate_department_roc_disc_spend$spending_change <- gdp_budget_roc$disc_change[25:41]
+
+fed_roc_disc_spend_melt <- melt(fed_department_roc_disc_spend, id=c("year"))
+ggplot(fed_roc_disc_spend_melt) +
+  geom_line(aes(x = year, y = value, color=variable))
+
+
+energy_roc_disc_spend_melt <- melt(energy_department_roc_disc_spend, id=c("year"))
+ggplot(energy_roc_disc_spend_melt) +
+  geom_line(aes(x = year, y = value, color=variable))
+
+
+climate_roc_disc_spend_melt <- melt(climate_department_roc_disc_spend, id=c("year"))
+ggplot(climate_roc_disc_spend_melt) +
+  geom_line(aes(x = year, y = value, color=variable))
+
 
 
 # Positive/negative chart
