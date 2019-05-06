@@ -1,3 +1,9 @@
+# TODO
+# R squared
+# P-values
+# Make PDF
+# Write descriptons for graphs
+
 # Packages
 install.packages("tidyverse")
 install.packages("reshape2")
@@ -11,22 +17,32 @@ climate_spend <- read.csv("data/climate_spending.csv")
 energy_spend <- read.csv("data/energy_spending.csv")
 fed_spend <- read.csv("data/fed_r_d_spending.csv")
 
-# Climate budget yearly growth by department
+
+
+# Climate budget yearly growth by department + linear model
 ggplot(data = climate_spend, mapping = aes(x = year, y = gcc_spending, color = department)) +
   geom_line() +
-  scale_y_log10()
-
+  scale_y_log10() +
+  ggtitle("Figure X: US Climate Spending per department") +
+  xlab("Year") + 
+  ylab("Dollars Spent (USD)")
 
 # Energy budget yearly growth by department
 ggplot(data = energy_spend, mapping = aes(x = year, y = energy_spending, color = department)) +
   geom_line() +
-  scale_y_log10()
+  scale_y_log10() +
+  ggtitle("Figure X: US Energy Spending per department") +
+  xlab("Year") + 
+  ylab("Dollars Spent (USD)")
 
 
 # Federal budget yearly growth by department
 ggplot(data = fed_spend, mapping = aes(x = year, y = rd_budget, color = department)) +
   geom_line() +
-  scale_y_log10()
+  scale_y_log10() +
+  ggtitle("Figure X: US Federal Spending per department") +
+  xlab("Year") + 
+  ylab("Dollars Spent (USD)")
 
 
 # GDP Growth yearly growth rate
@@ -49,35 +65,64 @@ yearly_disc_spend <- fed_spend %>%
   filter(department == "DOD") %>%
   select(year, discretionary_outlays)
 
+# GDP, spending discretionary spending
+all_spending <- data.frame("year" = yearly_gdp$year,
+                           "gdp" = yearly_gdp$gdp,
+                           "total_spending" = yearly_outlays$total_outlays,
+                           "disc_spending" = yearly_disc_spend$discretionary_outlays)
 
+spending_melt <- melt(all_spending, id=c("year"))
+
+ggplot(spending_melt) +
+  geom_line(aes(x = year, y = value, color=variable)) +
+  scale_color_manual(values = c("red","green", "blue"),
+                     labels = c("GDP", "Total Spending", "Discretionary Spending")) + 
+  ggtitle("GDP versus Spending") +
+  xlab("Year") +
+  ylab("Dollars (USD)")
 
 # A1 - Method 1: gdp roc with total_spend and disc_spend [R2]
 
 ## rate of change for yearly gdp
 gdp_change <- 100*diff(yearly_gdp$gdp)/yearly_gdp[-nrow(yearly_gdp),]$gdp
 total_outlay_change <- 100*diff(yearly_outlays$total_outlays)/yearly_outlays[-nrow(yearly_outlays),]$total_outlays
-disc_outlay_change <- 100*diff(yearly_disc_spend$discretionary_outlays)/yearly_disc_spend[-nrow(yearly_discretionary_spending),]$discretionary_outlays
+disc_outlay_change <- 100*diff(yearly_disc_spend$discretionary_outlays)/yearly_disc_spend[-nrow(yearly_disc_spend),]$discretionary_outlays
 
-gdp_budget_roc <- data.frame("Year" = yearly_gdp$year[2:42], 
+gdp_budget_roc <- data.frame("year" = yearly_gdp$year[2:42], 
                              "gdp_change" = gdp_change,
                              "outlay_change" = total_outlay_change,
                              "disc_change" = disc_outlay_change)
 
 p <- ggplot() +
-  geom_line(data = gdp_budget_roc, aes(x = Year, y = gdp_change), color = "blue") +
-  geom_line(data = gdp_budget_roc, aes(x = Year, y = outlay_change), color = "red") + 
-  geom_line(data = gdp_budget_roc, aes(x = Year, y = disc_change), color = "green") +
+  geom_line(data = gdp_budget_roc, aes(x = year, y = gdp_change), color = "blue") +
+  geom_line(data = gdp_budget_roc, aes(x = year, y = outlay_change), color = "red") + 
+  geom_line(data = gdp_budget_roc, aes(x = year, y = disc_change), color = "green") +
   xlab("Year") + 
   ylab("Rate of change (%)")
 
 print(p)
 
+# Fit a linear model
+roc_model <- lm(cbind(gdp_change, disc_outlay_change, outlay_change) ~ year, data = gdp_budget_roc)
+
+# Stats: R squared values and p-values
+gdp_change_summary <- summary(roc_model)["Response gdp_change"]
+gdp_change_r2 <- gdp_change_summary$`Response gdp_change`$r.squared
+gdp_change_pv <- gdp_change_summary$`Response gdp_change`$coefficients[,4]
+
+outlay_change_summary <- summary(roc_model)["Response outlay_change"]
+outlay_change_r2 <- outlay_change_summary$`Response outlay_change`$r.squared
+outlay_change_pv <- outlay_change_summary$`Response outlay_change`$coefficients[,4]
+
+disc_change_summary <- summary(roc_model)["Response disc_outlay_change"]
+disc_change_r2 <- disc_change_summary$`Response disc_outlay_change`$r.squared
+disc_change_pv <- disc_change_summary$`Response disc_outlay_change`$coefficients[,4]
 
 # A1 - Method 2: Melt data and then plot
-roc_melt <- melt(gdp_budget_roc, id=c("Year"))
+roc_melt <- melt(gdp_budget_roc, id=c("year"))
 
 ggplot(roc_melt) +
-  geom_line(aes(x = Year, y = value, color=variable)) +
+  geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red","green", "blue"),
                      labels = c("GDP", "Total Spending", "Discretionary Spending"))
 
