@@ -20,10 +20,12 @@ energy_spend <- read.csv("data/energy_spending.csv")
 fed_spend <- read.csv("data/fed_r_d_spending.csv")
 ```
 
-*Note: All R squared values and p-values exist in inline code. For a given Figure, just find its named code chunk and run the code under 'linear analysis'.*  
+*Note: All R squared values and p-values exist in inline code. For a given figure, just find its named code chunk and run the code under 'linear analysis'.*  
 
 # General Overview
-Here is my report.
+The following report is an overview of the historical trends for research budgets of varying federal research and development agencies.
+The following agencies are grouped into three main categories: Federal spending, energy spending, and climate spending. After analyzing the provided 
+data, several interesting trends were discovered. The findings are discusssed in the subsequent sections.
 
 
 ```{r overview_climate, echo=FALSE, warning=FALSE}
@@ -36,6 +38,8 @@ ggplot(data = climate_spend, mapping = aes(x = year, y = gcc_spending, color = d
   ylab("Dollars Spent (USD)")
 ```
 
+Figure 1 displays the budgets for various sub-agencies of global climate change spending. Here it is seen that most agencies see an increase in their budgets in 2015 relative to 2000. In 2010 there was a downturn for many of the smaller sub agencies. There was a major loss of funding which trended downwards until 2015. The range of the budgets for global climate spending per department was generally in between 30 million 1.5 billion USD.
+
 ```{r overview_energy, echo=FALSE, warning=FALSE}
 # Energy budget yearly growth by department
 ggplot(data = energy_spend, mapping = aes(x = year, y = energy_spending, color = department)) +
@@ -46,6 +50,8 @@ ggplot(data = energy_spend, mapping = aes(x = year, y = energy_spending, color =
   ylab("Dollars Spent (USD)")
 ```
 
+Figure 2 displays the budgets of all sub-agencies of the Department of Energy (DOE). Here it is also observed that almost all agencies had larger budgets in 2015 as compared to 1997. The top three sub-agencies by budget are Atomic Energy Defense, Office of Science R&D, and Basic Energy Sciences. The top two sub-agencies, Atomic Energy Defense, Office of Science R&D,individually  received nearly three times as much funding as the third top sub-agency, Basic Energy Sciences.
+
 ```{r overview_federal, echo=FALSE, warning=FALSE}
 # Federal budget yearly growth by department
 ggplot(data = fed_spend, mapping = aes(x = year, y = rd_budget, color = department)) +
@@ -55,6 +61,8 @@ ggplot(data = fed_spend, mapping = aes(x = year, y = rd_budget, color = departme
   xlab("Year") + 
   ylab("Dollars Spent (USD)")
 ```
+
+Figure 3 displays the budgets of all sub-agencies for US Federal spending. The largest recipient of research funding in the group was the Department of Defense (DOD). The DOD received 10 times more funding than the second most funded sub-agency. Here it is also observed that the sub-agencies form three groups funds received. The first group exists between half a billion dollars USD and just over 1 billion dollars USD. The next group exists between 1.3 billion and 15 billion USD. The last group exists over 15 billion. It is also observed that the department of homeland security (DHS) seen a large increase in funding after 2001. This is due mainly in part to the 9/11 attacks.
 
 ```{r gdp_growth, echo=FALSE, warning=FALSE}
 # GDP Growth yearly growth rate
@@ -90,6 +98,10 @@ ggplot(spending_melt) +
   ylab("Dollars (USD)")
 ```
 
+Figure 4 presents the gross domestic product (GDP), total government spending, and discretionary government spending from 1976 to 2017. Here it is seen that there is a large increase in the overall GDP during this time period. Additionally, government spending also experiences a large increase. Total spending experiences much more growth than discretionary spending.
+
+# GDP Growth and Department Spending Growth
+
 ```{r spending, echo=FALSE, warning=FALSE}
 # Rate of change for yearly gdp, total spending, and discretionary spending
 gdp_change <- 100*diff(yearly_gdp$gdp)/yearly_gdp[-nrow(yearly_gdp),]$gdp
@@ -119,6 +131,8 @@ gdp_spending_r2 <- summary(gdp_spending_model)$r.squared
 # p-value
 gdp_spending_pv <- summary(gdp_spending_model)$coefficients[2,4]
 ```
+
+Figure 5 displays the rate of change for the GDP, total government spending and discretionary government spending. Although the values in Figure 4 seems to have a large gap, it can be seen here the the growth rate for all three values were highly correlated. The r-squared value for this model was only 0.284, but that was due to the shape of the data having an increase cycle and a decrease cycle.
 
 ```{r gdp_department_roc, echo=FALSE, warning=FALSE}
 fed_mean_spend <- fed_spend %>%
@@ -171,6 +185,8 @@ gdp_fed_r2 <- summary(gdp_fed_model)$r.squared
 gdp_fed_pv <- summary(gdp_fed_model)$coefficients[2,4]
 ```
 
+Figure 6 presents the rate of change of the GDP versus the rate of change for the average amount of research funding for all federal sub-agencies. It is observed that although both values increase overall from 1976 to 2017, there was a trend towards slower growth. Research budgets for federal sub-agencies experienced much more turbulent changes on average as opposed to the GDP.
+
 ```{r energy_department_roc, echo=FALSE, warning=FALSE}
 energy_melt <- melt(energy_roc, id=c("year"))
 ggplot(energy_melt) +
@@ -187,6 +203,8 @@ gdp_energy_r2 <- summary(gdp_energy_model)$r.squared
 # p-value
 gdp_energy_pv <- summary(gdp_energy_model)$coefficients[2,4]
 ```
+
+Figure 7 presents the rate of change of the US GDP versus the average research budget for all of sub-agencies for the Department of Energy (DOE). Here it is observed that the DOE experienced more cyclic growth than the GDP. Rather than slower growth, there were many periods of growth followed by periods of decline. Although in 2013, the DOE experienced a boom in growth. The r-squared value for this model was 0.005. This is understandable given the radical difference in the growth models for both values.
 
 ```{r climate_department_roc, echo=FALSE, warning=FALSE,message=FALSE}
 climate_melt <- melt(climate_roc, id=c("year"))
@@ -205,14 +223,12 @@ gdp_climate_r2 <- summary(gdp_climate_model)$r.squared
 gdp_climate_pv <- summary(gdp_climate_model)$coefficients[2,4]
 ```
 
+Figure 8 displays the growth rate of the GDP versus the growth rate of the average research budget for all sub-agencies of Global Climate Change (GCC) Spending. Here it is also observed that the growth rate between the two values seem to have low correlation. GDP trends downward until in growth until 2009 and then trends upward. The GCC spending has many more periods of growth and then decline.
+
+# GDP versus All Sub-agencies
+
 ```{r gdp_per_department_setup, echo=FALSE, warning=FALSE}
-" 
-function: department_matrix_roc
-description: Given a data frame and a column, gets the 
-             rate of change per department in said column
-returns: matrix where each col is department, and each row
-         is percent change from previous year
-"
+# See spending_analysis.R for function description
 department_matrix_roc <- function(df, monies_col) {
   departments <- unique(df$department)
   dep_one_yearly <- filter(df, department == as.character(departments[1])) # all unique years
@@ -266,6 +282,8 @@ gdp_fed_r2 <- summary(gdp_fed_department_model)$r.squared
 gdp_fed_pv <- summary(gdp_fed_department_model)$coefficients[2,4]
 ```
 
+Figure 9 presents the growth rate for all individual sub-agencies of the federal department, as well as the growth rate for the GDP. Here it is observed that most agencies experience cycles of growth and decline. Agencies like the Department of Homeland security and the VA experience unusually large spikes in growth.
+
 ```{r energy_per_department, echo=FALSE, warning=FALSE}
 energy_roc_melt <- melt(energy_department_roc, id=c("year"))
 ggplot(energy_roc_melt) +
@@ -282,6 +300,8 @@ gdp_energy_r2 <- summary(gdp_energy_department_model)$r.squared
 gdp_energy_pv <- summary(gdp_energy_department_model)$coefficients[2,4]
 ```
 
+Figure 10 presents the growth rate for the GDP and all sub-agencies of the Department of energy. Here, a similar pattern is observed from figure 9. There is mainly cyclic periods of growth and decline. Additionally, the Nuclear energy and Fossil energy departments experience periods of extremely high growth.
+
 ```{r climate_per_department, echo=FALSE, warning=FALSE}
 climate_roc_melt <- melt(climate_department_roc, id=c("year"))
 ggplot(climate_roc_melt) +
@@ -297,6 +317,11 @@ gdp_climate_r2 <- summary(gdp_climate_department_model)$r.squared
 # p-value
 gdp_climate_pv <- summary(gdp_climate_department_model)$coefficients[2,4]
 ```
+
+Figure 11 presents the growth rates of GDP versus all sub-agencies of Global Climate Change spending. A similar pattern is noticed here. There are many period of growth and decline for each agency. The Department of Commerce and the Department of Agriculture experience periods of extremely high growth as well.
+
+# Total Federal Spending versus Each Department
+The following figures present the differences in growth rate between total federal spending and the growth rate for each department.
 
 ```{r total_spend_roc_setup, echo=FALSE, warning=FALSE}
 fed_roc_total_spend <- data.frame("year" = fed_mean_spend$year[2:42],
@@ -330,6 +355,8 @@ total_spend_fed_r2 <- summary(total_spend_fed_model)$r.squared
 total_spend_fed_pv <- summary(total_spend_fed_model)$coefficients[2,4]
 ```
 
+Figure 12 presents the growth rates total federal spending and average federal research budgets. It is observed that total spending growth experienced periods of decline through the 1980s. Following 2005, there was a much greater increase in total federal spending. Additionally, federal research budgets experienced their greatest period of growth from 1994 to 2003. Although both trendlines may not appear related at first, it is seen that if total federal spending experiences a decline, then the federal research budgets tend to experience a decline in the years following.
+
 ```{r total_spend_vs_energy, echo=FALSE, warning=FALSE}
 energy_melt_total_spend <- melt(energy_roc_total_spend, id=c("year"))
 ggplot(energy_melt_total_spend) +
@@ -346,6 +373,8 @@ total_spend_energy_r2 <- summary(total_spend_energy_model)$r.squared
 # p-value
 total_spend_energy_pv <- summary(total_spend_energy_model)$coefficients[2,4]
 ```
+
+Figure 13 presents the growth rate of total federal spending compared to the growth rate of average research budget for all agencies of the Department of Energy (DOE). It is observed that the DOE experienced many cycles of growth and decline, whereas this did not occur repeatedly with total federal spending growth. Additionally, it seems that there is no great correlation between the two trendlines. The squared value for the trendlines was 0.005.
 
 ```{r total_spend_vs_climate, echo=FALSE, warning=FALSE}
 climate_melt_total_spend <- melt(climate_roc_total_spend, id=c("year"))
@@ -364,6 +393,8 @@ total_spend_climate_r2 <- summary(total_spend_climate_model)$r.squared
 total_spend_climate_pv <- summary(total_spend_climate_model)$coefficients[2,4]
 ```
 
+Figure 14 presents the growth rate of total federal spending compared to the average research budget for every sub-agencies of the Global Climate Change (GCC) spending. It is observed here that both trend lines tend to share some behavior after 2002. They both experience overall growth from 2002 to 2008. Then from 2008 until 2013, they both experienced a decline. Following that both trend lines trend upwards until 2017. Although the r-squared value of this model may be low at 0.002, it does not capture the change in patterns for both trendlines.
+
 ```{r total_spend_roc_versus_department, echo=FALSE, warning=FALSE}
 fed_department_roc_total_spend <- fed_department_roc[,!(names(fed_department_roc) %in% c("gdp_change"))]
 fed_department_roc_total_spend$spending_change <- gdp_budget_roc$outlay_change
@@ -374,6 +405,9 @@ energy_department_roc_total_spend$spending_change <- gdp_budget_roc$outlay_chang
 climate_department_roc_total_spend <- climate_department_roc[,!(names(climate_department_roc) %in% c("gdp_change"))]
 climate_department_roc_total_spend$spending_change <- gdp_budget_roc$outlay_change[25:41]
 ```
+
+# Total Federal Spending versus All Sub-agencies
+Figures 15 through 17 present the growth rate of total federal spending compared to the growth rates for each sub-agency for each department. For these figure there is a common pattern. Most sub-agencies experience cyclical periods of growth and decline. Additionally, for each department, there is typically and agency which tends to seem booming growth as compared to the other agencies. In figure 17, many of the climate change sub-agencies tend to experience a large boom in growth after 2006 which is generally sustained until 2010.
 
 ```{r total_spend_vs_fed_department, echo=FALSE, warning=FALSE}
 fed_roc_total_spend_melt <- melt(fed_department_roc_total_spend, id=c("year"))
@@ -438,6 +472,8 @@ climate_roc_disc_spend <- data.frame("year" = climate_mean_spend$year[2:18],
                                       "disc_spending_change" = disc_outlay_change[25:41])
 ```
 
+# Disctretionary Spending versus Each Department
+
 ```{r disc_spend_vs_fed, echo=FALSE, warning=FALSE}
 fed_melt_disc_spend <- melt(fed_roc_disc_spend, id=c("year"))
 ggplot(fed_melt_disc_spend) +
@@ -454,6 +490,8 @@ disc_spend_fed_r2 <- summary(disc_spend_fed_model)$r.squared
 # p-value
 disc_spend_fed_pv <- summary(disc_spend_fed_model)$coefficients[2,4]
 ```
+
+Figure 18 presents the growth rates of federal discretionary spending compared to the growth rate of the average research budget for all federal agencies. Here there is a strong pattern observed. It is seen that the growth rates for both trend lines seem to mirror each others trends following 1985. Both trendlines experience overall decline from 1985 to 1995. Following that period they both grow from 1995 to 2003 and then both decline from 2003 to 2013. There is an extremely strong correlation here. The r-squared value here is 0.133. Although this seems low, it is almost 10 times greater than the other r-squared values for spending versus department. There are nuances not captured by the r-squared value, but there is a clear pattern which exists.
 
 ```{r disc_spend_vs_energy, echo=FALSE, warning=FALSE}
 energy_melt_disc_spend <- melt(energy_roc_disc_spend, id=c("year"))
@@ -472,6 +510,8 @@ disc_spend_energy_r2 <- summary(disc_spend_energy_model)$r.squared
 disc_spend_energy_pv <- summary(disc_spend_energy_model)$coefficients[2,4]
 ```
 
+Figure 19 presents the growth  rates of federal discretionary spending compared to the growth rate of the average research budget for all Department of Energy (DOE) agencies. Here is it observed that the trendlines tend to share a pattern for overall growth and decline following 2003. Although the rates of growth are not similar, the patterns appear to be similar. Both trend lines experience decline from around 2002 to around 2006, growth from around 2006 to 2009, decline from around 2009 to 2011, and growth from 2011 to 2015.
+
 ```{r disc_spend_vs_climate, echo=FALSE, warning=FALSE}
 climate_melt_disc_spend <- melt(climate_roc_disc_spend, id=c("year"))
 ggplot(climate_melt_disc_spend) +
@@ -489,6 +529,8 @@ disc_spend_climate_r2 <- summary(disc_spend_climate_model)$r.squared
 disc_spend_climate_pv <- summary(disc_spend_climate_model)$coefficients[2,4]
 ```
 
+Figure 20 presents the growth  rates of federal discretionary spending compared to the growth rate of the average research budget for all Global Climate Change (GCC)  agencies. The trend line for the GCC seems to be much less correlated to discretionary spending as compared to the DOE or the federal research agencies. Additionally, the r-squared value is much lower at 0.046. This is more than half of the federal agencies 0.133.
+
 ```{r disc_spend_roc_versus_department, echo=FALSE, warning=FALSE}
 fed_department_roc_disc_spend <- fed_department_roc[,!(names(fed_department_roc) %in% c("gdp_change"))]
 fed_department_roc_disc_spend$spending_change <- gdp_budget_roc$disc_change
@@ -499,6 +541,10 @@ energy_department_roc_disc_spend$spending_change <- gdp_budget_roc$disc_change[2
 climate_department_roc_disc_spend <- climate_department_roc[,!(names(climate_department_roc) %in% c("gdp_change"))]
 climate_department_roc_disc_spend$spending_change <- gdp_budget_roc$disc_change[25:41]
 ```
+
+# Discretionary Spending versus All Sub-agencies
+
+Figures 21 to 23 present the growth rate of discretionary federal spending compared to the sub-agencies of each major department. The data in these 3 figures reiterates a pattern seen in the previous figures which compared all sub agencies. Most agencies tend to experience cyclic periods of growth and decline. In each major department there are sub-agencies which tend to see one or two periods of greater than average growth.
 
 ```{r disc_spend_vs_fed_department, echo=FALSE, warning=FALSE}
 fed_roc_disc_spend_melt <- melt(fed_department_roc_disc_spend, id=c("year"))

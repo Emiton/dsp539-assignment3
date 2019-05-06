@@ -1,5 +1,4 @@
 # TODO
-# R squared & P-values
 # Write descriptons for graphs
 
 # Packages
@@ -347,12 +346,6 @@ climate_roc_disc_spend_melt <- melt(climate_department_roc_disc_spend, id=c("yea
 ggplot(climate_roc_disc_spend_melt) +
   geom_line(aes(x = year, y = value, color=variable))
 
-
-
-# Positive/negative chart
-# if ROC positive = 1
-# if ROC negative = -1
-# make new chart with these values for ROC and plot against all departments
 
 
 
