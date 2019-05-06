@@ -20,7 +20,7 @@ energy_spend <- read.csv("data/energy_spending.csv")
 fed_spend <- read.csv("data/fed_r_d_spending.csv")
 ```
 
-*Note: All R squared values and p-values exist in inline code. Please run code to see values and descriptions of values.*  
+*Note: All R squared values and p-values exist in inline code. For a given Figure, just find its named code chunk and run the code under 'linear analysis'.*  
 
 # General Overview
 Here is my report.
@@ -31,7 +31,7 @@ Here is my report.
 ggplot(data = climate_spend, mapping = aes(x = year, y = gcc_spending, color = department)) +
   geom_line() +
   scale_y_log10() +
-  ggtitle("Figure X - US Climate Spending per department") +
+  ggtitle("Figure 1 - US Climate Spending per department") +
   xlab("Year") + 
   ylab("Dollars Spent (USD)")
 ```
@@ -41,7 +41,7 @@ ggplot(data = climate_spend, mapping = aes(x = year, y = gcc_spending, color = d
 ggplot(data = energy_spend, mapping = aes(x = year, y = energy_spending, color = department)) +
   geom_line() +
   scale_y_log10() +
-  ggtitle("Figure X - US Energy Spending per department") +
+  ggtitle("Figure 2 - US Energy Spending per department") +
   xlab("Year") + 
   ylab("Dollars Spent (USD)")
 ```
@@ -51,7 +51,7 @@ ggplot(data = energy_spend, mapping = aes(x = year, y = energy_spending, color =
 ggplot(data = fed_spend, mapping = aes(x = year, y = rd_budget, color = department)) +
   geom_line() +
   scale_y_log10() +
-  ggtitle("Figure X - US Federal Spending per department") +
+  ggtitle("Figure 3 - US Federal Spending per department") +
   xlab("Year") + 
   ylab("Dollars Spent (USD)")
 ```
@@ -85,7 +85,7 @@ ggplot(spending_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red","green", "blue"),
                      labels = c("GDP", "Total Spending", "Discretionary Spending")) + 
-  ggtitle("Figure X - GDP versus Spending") +
+  ggtitle("Figure 4 - GDP versus Spending") +
   xlab("Year") +
   ylab("Dollars (USD)")
 ```
@@ -101,22 +101,6 @@ gdp_budget_roc <- data.frame("year" = yearly_gdp$year[2:42],
                              "outlay_change" = total_outlay_change,
                              "disc_change" = disc_outlay_change)
 
-# Fit a linear model
-roc_model <- lm(cbind(gdp_change, disc_outlay_change, outlay_change) ~ year, data = gdp_budget_roc)
-
-# Stats: R squared values and p-values
-gdp_change_summary <- summary(roc_model)["Response gdp_change"]
-gdp_change_r2 <- gdp_change_summary$`Response gdp_change`$r.squared
-gdp_change_pv <- gdp_change_summary$`Response gdp_change`$coefficients[,4]
-
-outlay_change_summary <- summary(roc_model)["Response outlay_change"]
-outlay_change_r2 <- outlay_change_summary$`Response outlay_change`$r.squared
-outlay_change_pv <- outlay_change_summary$`Response outlay_change`$coefficients[,4]
-
-disc_change_summary <- summary(roc_model)["Response disc_outlay_change"]
-disc_change_r2 <- disc_change_summary$`Response disc_outlay_change`$r.squared
-disc_change_pv <- disc_change_summary$`Response disc_outlay_change`$coefficients[,4]
-
 # Plot results
 roc_melt <- melt(gdp_budget_roc, id=c("year"))
 
@@ -124,9 +108,16 @@ ggplot(roc_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red","green", "blue"),
                      labels = c("GDP", "Total Spending", "Discretionary Spending")) +
-  ggtitle("Figure X - Rate of Change: GDP, Total Spendng, Discretionary Spending") +
+  ggtitle("Figure 5 - Rate of Change: GDP, Total Spendng, Discretionary Spending") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+gdp_spending_model <- lm(value ~ year, data = roc_melt)
+# R-squared
+gdp_spending_r2 <- summary(gdp_spending_model)$r.squared
+# p-value
+gdp_spending_pv <- summary(gdp_spending_model)$coefficients[2,4]
 ```
 
 ```{r gdp_department_roc, echo=FALSE, warning=FALSE}
@@ -168,9 +159,16 @@ fed_melt <- melt(fed_roc, id=c("year"))
 ggplot(fed_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red", "blue")) +
-  ggtitle("Figure X - Rate of Change: GDP versus Federal Spending") +
+  ggtitle("Figure 6 - Rate of Change: GDP versus Federal Spending") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+gdp_fed_model <- lm(value ~ year, data = fed_melt)
+# R-squared
+gdp_fed_r2 <- summary(gdp_fed_model)$r.squared
+# p-value
+gdp_fed_pv <- summary(gdp_fed_model)$coefficients[2,4]
 ```
 
 ```{r energy_department_roc, echo=FALSE, warning=FALSE}
@@ -178,9 +176,16 @@ energy_melt <- melt(energy_roc, id=c("year"))
 ggplot(energy_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red", "blue")) +
-  ggtitle("Figure X - Rate of Change: GDP versus Energy Spending") +
+  ggtitle("Figure 7 - Rate of Change: GDP versus Energy Spending") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+gdp_energy_model <- lm(value ~ year, data = energy_melt)
+# R-squared
+gdp_energy_r2 <- summary(gdp_energy_model)$r.squared
+# p-value
+gdp_energy_pv <- summary(gdp_energy_model)$coefficients[2,4]
 ```
 
 ```{r climate_department_roc, echo=FALSE, warning=FALSE,message=FALSE}
@@ -188,9 +193,16 @@ climate_melt <- melt(climate_roc, id=c("year"))
 ggplot(climate_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red", "blue")) +
-  ggtitle("Figure X - Rate of Change: GDP versus Climate Spending") +
+  ggtitle("Figure 8 - Rate of Change: GDP versus Climate Spending") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+gdp_climate_model <- lm(value ~ year, data = climate_melt)
+# R-squared
+gdp_climate_r2 <- summary(gdp_climate_model)$r.squared
+# p-value
+gdp_climate_pv <- summary(gdp_climate_model)$coefficients[2,4]
 ```
 
 ```{r gdp_per_department_setup, echo=FALSE, warning=FALSE}
@@ -231,30 +243,59 @@ climate_department_roc$gdp_change <- gdp_budget_roc$gdp_change[25:41]
 ```
 
 ```{r federal_per_department, echo=FALSE, warning=FALSE}
+# Fix NaN values
+is.nan.data.frame <- function(x)
+do.call(cbind, lapply(x, is.nan))
+fed_department_roc[is.nan(fed_department_roc)] <- 0
+
+# Get rid of Inf value
+fed_department_roc$DHS[26] = 0
+
 fed_roc_melt <- melt(fed_department_roc, id=c("year"))
 ggplot(fed_roc_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
-  ggtitle("Figure X - Rate of Change: GDP and Federal Spending per Department") +
+  ggtitle("Figure 9 - Rate of Change: GDP and Federal Spending per Department") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+gdp_fed_department_model <- lm(value ~ year, data = fed_roc_melt)
+# R-squared
+gdp_fed_r2 <- summary(gdp_fed_department_model)$r.squared
+# p-value
+gdp_fed_pv <- summary(gdp_fed_department_model)$coefficients[2,4]
 ```
 
 ```{r energy_per_department, echo=FALSE, warning=FALSE}
 energy_roc_melt <- melt(energy_department_roc, id=c("year"))
 ggplot(energy_roc_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
-  ggtitle("Figure X - Rate of Change: GDP and Energy Spending per Department") +
+  ggtitle("Figure 10 - Rate of Change: GDP and Energy Spending per Department") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+gdp_energy_department_model <- lm(value ~ year, data = energy_roc_melt)
+# R-squared
+gdp_energy_r2 <- summary(gdp_energy_department_model)$r.squared
+# p-value
+gdp_energy_pv <- summary(gdp_energy_department_model)$coefficients[2,4]
 ```
 
 ```{r climate_per_department, echo=FALSE, warning=FALSE}
 climate_roc_melt <- melt(climate_department_roc, id=c("year"))
 ggplot(climate_roc_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
-  ggtitle("Figure X - Rate of Change: GDP and Climate Spending per Department") +
+  ggtitle("Figure 11 - Rate of Change: GDP and Climate Spending per Department") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+gdp_climate_department_model <- lm(value ~ year, data = climate_roc_melt)
+# R-squared
+gdp_climate_r2 <- summary(gdp_climate_department_model)$r.squared
+# p-value
+gdp_climate_pv <- summary(gdp_climate_department_model)$coefficients[2,4]
 ```
 
 ```{r total_spend_roc_setup, echo=FALSE, warning=FALSE}
@@ -277,9 +318,16 @@ fed_melt_total_spend <- melt(fed_roc_total_spend, id=c("year"))
 ggplot(fed_melt_total_spend) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red", "blue")) +
-  ggtitle("Figure X - Rate of Change: Total Spending versus Federal Spending") +
+  ggtitle("Figure 12 - Rate of Change: Total Spending versus Federal Spending") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+total_spend_fed_model <- lm(value ~ year, data = fed_melt_total_spend)
+# R-squared
+total_spend_fed_r2 <- summary(total_spend_fed_model)$r.squared
+# p-value
+total_spend_fed_pv <- summary(total_spend_fed_model)$coefficients[2,4]
 ```
 
 ```{r total_spend_vs_energy, echo=FALSE, warning=FALSE}
@@ -287,9 +335,16 @@ energy_melt_total_spend <- melt(energy_roc_total_spend, id=c("year"))
 ggplot(energy_melt_total_spend) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red", "blue")) +
-  ggtitle("Figure X - Rate of Change: Total Spending versus Energy Spending") +
+  ggtitle("Figure 13 - Rate of Change: Total Spending versus Energy Spending") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+total_spend_energy_model <- lm(value ~ year, data = energy_melt_total_spend)
+# R-squared
+total_spend_energy_r2 <- summary(total_spend_energy_model)$r.squared
+# p-value
+total_spend_energy_pv <- summary(total_spend_energy_model)$coefficients[2,4]
 ```
 
 ```{r total_spend_vs_climate, echo=FALSE, warning=FALSE}
@@ -297,9 +352,16 @@ climate_melt_total_spend <- melt(climate_roc_total_spend, id=c("year"))
 ggplot(climate_melt_total_spend) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red", "blue")) +
-  ggtitle("Figure X - Rate of Change: Total Spending versus Climate Spending") +
+  ggtitle("Figure 14 - Rate of Change: Total Spending versus Climate Spending") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+total_spend_climate_model <- lm(value ~ year, data = climate_melt_total_spend)
+# R-squared
+total_spend_climate_r2 <- summary(total_spend_climate_model)$r.squared
+# p-value
+total_spend_climate_pv <- summary(total_spend_climate_model)$coefficients[2,4]
 ```
 
 ```{r total_spend_roc_versus_department, echo=FALSE, warning=FALSE}
@@ -317,27 +379,48 @@ climate_department_roc_total_spend$spending_change <- gdp_budget_roc$outlay_chan
 fed_roc_total_spend_melt <- melt(fed_department_roc_total_spend, id=c("year"))
 ggplot(fed_roc_total_spend_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
-  ggtitle("Figure X - Rate of Change: Total and Federal Spending per Department") +
+  ggtitle("Figure 15 - Rate of Change: Total and Federal Spending per Department") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+total_spend_fed_department_model <- lm(value ~ year, data = fed_roc_total_spend_melt)
+# R-squared
+total_spend_fed_r2 <- summary(total_spend_fed_department_model)$r.squared
+# p-value
+total_spend_fed_pv <- summary(total_spend_fed_department_model)$coefficients[2,4]
 ```
 
 ```{r total_spend_vs_energy_department, echo=FALSE, warning=FALSE}
 energy_roc_total_spend_melt <- melt(energy_department_roc_total_spend, id=c("year"))
 ggplot(energy_roc_total_spend_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
-  ggtitle("Figure X - Rate of Change: Total and Energy Spending per Department") +
+  ggtitle("Figure 16 - Rate of Change: Total and Energy Spending per Department") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+total_spend_energy_department_model <- lm(value ~ year, data = energy_roc_total_spend_melt)
+# R-squared
+total_spend_energy_r2 <- summary(total_spend_energy_department_model)$r.squared
+# p-value
+total_spend_energy_pv <- summary(total_spend_energy_department_model)$coefficients[2,4]
 ```
 
 ```{r total_spend_vs_climate_department, echo=FALSE, warning=FALSE}
 climate_roc_total_spend_melt <- melt(climate_department_roc_total_spend, id=c("year"))
 ggplot(climate_roc_total_spend_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
-  ggtitle("Figure X - Rate of Change: Total and Climate Spending per Department") +
+  ggtitle("Figure 17 - Rate of Change: Total and Climate Spending per Department") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+total_spend_climate_department_model <- lm(value ~ year, data = climate_roc_total_spend_melt)
+# R-squared
+total_spend_climate_r2 <- summary(total_spend_climate_department_model)$r.squared
+# p-value
+total_spend_climate_pv <- summary(total_spend_climate_department_model)$coefficients[2,4]
 ```
 
 ```{r disc_spend_roc_setup, echo=FALSE, warning=FALSE}
@@ -360,9 +443,16 @@ fed_melt_disc_spend <- melt(fed_roc_disc_spend, id=c("year"))
 ggplot(fed_melt_disc_spend) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red", "blue")) +
-  ggtitle("Figure X - Rate of Change: Discretionary Spending versus Federal Spending") +
+  ggtitle("Figure 18 - Rate of Change: Discretionary Spending versus Federal Spending") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+disc_spend_fed_model <- lm(value ~ year, data = fed_melt_disc_spend)
+# R-squared
+disc_spend_fed_r2 <- summary(disc_spend_fed_model)$r.squared
+# p-value
+disc_spend_fed_pv <- summary(disc_spend_fed_model)$coefficients[2,4]
 ```
 
 ```{r disc_spend_vs_energy, echo=FALSE, warning=FALSE}
@@ -370,9 +460,16 @@ energy_melt_disc_spend <- melt(energy_roc_disc_spend, id=c("year"))
 ggplot(energy_melt_disc_spend) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red", "blue")) +
-  ggtitle("Figure X - Rate of Change: Discretionary Spending versus Energy Spending") +
+  ggtitle("Figure 19 - Rate of Change: Discretionary Spending versus Energy Spending") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+disc_spend_energy_model <- lm(value ~ year, data = energy_melt_disc_spend)
+# R-squared
+disc_spend_energy_r2 <- summary(disc_spend_energy_model)$r.squared
+# p-value
+disc_spend_energy_pv <- summary(disc_spend_energy_model)$coefficients[2,4]
 ```
 
 ```{r disc_spend_vs_climate, echo=FALSE, warning=FALSE}
@@ -380,9 +477,16 @@ climate_melt_disc_spend <- melt(climate_roc_disc_spend, id=c("year"))
 ggplot(climate_melt_disc_spend) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red", "blue")) +
-  ggtitle("Figure X - Rate of Change: Discretionary Spending versus Climate Spending") +
+  ggtitle("Figure 20 - Rate of Change: Discretionary Spending versus Climate Spending") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+disc_spend_climate_model <- lm(value ~ year, data = climate_melt_disc_spend)
+# R-squared
+disc_spend_climate_r2 <- summary(disc_spend_climate_model)$r.squared
+# p-value
+disc_spend_climate_pv <- summary(disc_spend_climate_model)$coefficients[2,4]
 ```
 
 ```{r disc_spend_roc_versus_department, echo=FALSE, warning=FALSE}
@@ -400,25 +504,46 @@ climate_department_roc_disc_spend$spending_change <- gdp_budget_roc$disc_change[
 fed_roc_disc_spend_melt <- melt(fed_department_roc_disc_spend, id=c("year"))
 ggplot(fed_roc_disc_spend_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
-  ggtitle("Figure X - Rate of Change: Discretionary and Federal Spending per Department") +
+  ggtitle("Figure 21 - Rate of Change: Discretionary and Federal Spending per Department") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+disc_spend_fed_department_model <- lm(value ~ year, data = fed_roc_disc_spend_melt)
+# R-squared
+disc_spend_fed_r2 <- summary(disc_spend_fed_department_model)$r.squared
+# p-value
+disc_spend_fed_pv <- summary(disc_spend_fed_department_model)$coefficients[2,4]
 ```
 
 ```{r disc_spend_vs_energy_department, echo=FALSE, warning=FALSE}
 energy_roc_disc_spend_melt <- melt(energy_department_roc_disc_spend, id=c("year"))
 ggplot(energy_roc_disc_spend_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
-  ggtitle("Figure X - Rate of Change: Discretionary and Energy Spending per Department") +
+  ggtitle("Figure 22 - Rate of Change: Discretionary and Energy Spending per Department") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+disc_spend_energy_department_model <- lm(value ~ year, data = energy_roc_disc_spend_melt)
+# R-squared
+disc_spend_energy_r2 <- summary(disc_spend_energy_department_model)$r.squared
+# p-value
+disc_spend_energy_pv <- summary(disc_spend_energy_department_model)$coefficients[2,4]
 ```
 
 ```{r disc_spend_vs_climate_department, echo=FALSE, warning=FALSE}
 climate_roc_disc_spend_melt <- melt(climate_department_roc_disc_spend, id=c("year"))
 ggplot(climate_roc_disc_spend_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
-  ggtitle("Figure X - Rate of Change: Discretionary and Climate Spending per Department") +
+  ggtitle("Figure 23 - Rate of Change: Discretionary and Climate Spending per Department") +
   xlab("Year") +
   ylab("Percent Change (%)")
+
+# Linear analysis
+disc_spend_climate_department_model <- lm(value ~ year, data = climate_roc_disc_spend_melt)
+# R-squared
+disc_spend_climate_r2 <- summary(disc_spend_climate_department_model)$r.squared
+# p-value
+disc_spend_climate_pv <- summary(disc_spend_climate_department_model)$coefficients[2,4]
 ```

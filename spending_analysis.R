@@ -1,7 +1,5 @@
 # TODO
-# R squared
-# P-values
-# Make PDF
+# R squared & P-values
 # Write descriptons for graphs
 
 # Packages
@@ -102,22 +100,6 @@ p <- ggplot() +
 
 print(p)
 
-# Fit a linear model
-roc_model <- lm(cbind(gdp_change, disc_outlay_change, outlay_change) ~ year, data = gdp_budget_roc)
-
-# Stats: R squared values and p-values
-gdp_change_summary <- summary(roc_model)["Response gdp_change"]
-gdp_change_r2 <- gdp_change_summary$`Response gdp_change`$r.squared
-gdp_change_pv <- gdp_change_summary$`Response gdp_change`$coefficients[,4]
-
-outlay_change_summary <- summary(roc_model)["Response outlay_change"]
-outlay_change_r2 <- outlay_change_summary$`Response outlay_change`$r.squared
-outlay_change_pv <- outlay_change_summary$`Response outlay_change`$coefficients[,4]
-
-disc_change_summary <- summary(roc_model)["Response disc_outlay_change"]
-disc_change_r2 <- disc_change_summary$`Response disc_outlay_change`$r.squared
-disc_change_pv <- disc_change_summary$`Response disc_outlay_change`$coefficients[,4]
-
 # A1 - Method 2: Melt data and then plot
 roc_melt <- melt(gdp_budget_roc, id=c("year"))
 
@@ -125,6 +107,13 @@ ggplot(roc_melt) +
   geom_line(aes(x = year, y = value, color=variable)) +
   scale_color_manual(values = c("red","green", "blue"),
                      labels = c("GDP", "Total Spending", "Discretionary Spending"))
+
+# Linear analysis
+gdp_spending_model <- lm(value ~ year, data = roc_melt)
+# R-squared
+summary(gdp_spending_model)$r.squared
+# p-value
+summary(gdp_spending_model)$coefficients[2,4]
 
 
 # A2. gdp roc vs per group roc (fed, energy, climate) [R2]
@@ -161,6 +150,19 @@ energy_roc <- energy_roc[-nrow(energy_roc),] # Remove last row b/c there is no G
 climate_roc <- data.frame("year" = climate_mean_spend$year[2:18],
                           "climate_change" = climate_mean_change,
                           "gdp_change" = gdp_change[25:41])
+
+## Linear Analysis
+# Federal vs GDP
+gdp_fed_mean_model <- lm(cbind(fed_change, gdp_change) ~ year, data = fed_roc)
+summary(gdp_fed_mean_model)['Response gdp_change']$`Response gdp_change`$r.squared
+
+outlay_change_summary <- summary(roc_model)["Response outlay_change"]
+print("R Squared and p-value for outlay_change")
+outlay_change_summary$`Response outlay_change`$r.squared
+
+
+gdp_energy_mean_model <- lm(cbind(energy_change, gdp_change) ~ year, data = energy_roc)
+gdp_climate_mean_model <- lm(cbind(climate_change, gdp_change) ~ year, data = climate_roc)
 
 
 # make plot for each roc versus GDP
@@ -210,6 +212,13 @@ department_matrix_roc <- function(df, monies_col) {
 
 fed_department_roc <- department_matrix_roc(fed_spend, "rd_budget")
 fed_department_roc$gdp_change <- gdp_budget_roc$gdp_change
+
+# Fix NaN values
+is.nan.data.frame <- function(x)
+do.call(cbind, lapply(x, is.nan))
+fed_department_roc[is.nan(fed_department_roc)] <- 0
+# Fix Inf value
+fed_department_roc$DHS[26] = 0
 
 energy_department_roc <- department_matrix_roc(energy_spend, "energy_spending")
 energy_department_roc <- energy_department_roc[-nrow(energy_department_roc),] # remove last row, no GDP for 2018
